@@ -1,0 +1,84 @@
+SQL QUERIES – BUSINESS ANALYST PROJECT
+
+1. Monthly Sales Trend
+SELECT 
+    DATE_FORMAT(Date, '%Y-%m') AS Month,
+    SUM(TotalAmount) AS TotalSales
+FROM RegionalSales2025
+WHERE OrderStatus = 'Completed'
+GROUP BY Month
+ORDER BY Month;
+
+--------------------------------------------------
+
+2. Cancelled & Returned Orders (Region-wise)
+SELECT 
+    Region,
+    COUNT(*) AS TotalOrders,
+    SUM(CASE WHEN OrderStatus = 'Cancelled' THEN 1 ELSE 0 END) AS Cancelled,
+    SUM(CASE WHEN OrderStatus = 'Returned' THEN 1 ELSE 0 END) AS Returned
+FROM RegionalSales2025
+GROUP BY Region;
+
+--------------------------------------------------
+
+3. Top 5 Revenue Loss Products
+SELECT 
+    ProductName,
+    SUM(TotalAmount) AS RevenueLoss
+FROM RegionalSales2025
+WHERE OrderStatus IN ('Cancelled', 'Returned')
+GROUP BY ProductName
+ORDER BY RevenueLoss DESC
+LIMIT 5;
+
+--------------------------------------------------
+
+4. Average Order Value (Category-wise)
+SELECT 
+    Category,
+    ROUND(AVG(TotalAmount), 2) AS AvgOrderValue
+FROM RegionalSales2025
+WHERE OrderStatus = 'Completed'
+GROUP BY Category;
+
+--------------------------------------------------
+
+5. Top Performing Sales Agents
+SELECT 
+    SalesAgent,
+    SUM(TotalAmount) AS TotalRevenue
+FROM RegionalSales2025
+WHERE OrderStatus = 'Completed'
+GROUP BY SalesAgent
+ORDER BY TotalRevenue DESC
+LIMIT 5;
+
+--------------------------------------------------
+
+6. Category Contribution to Total Sales
+SELECT 
+    Category,
+    SUM(TotalAmount) AS CategorySales,
+    ROUND(SUM(TotalAmount) * 100.0 / 
+        (SELECT SUM(TotalAmount) FROM RegionalSales2025 WHERE OrderStatus='Completed'), 2
+    ) AS ContributionPercent
+FROM RegionalSales2025
+WHERE OrderStatus = 'Completed'
+GROUP BY Category;
+
+--------------------------------------------------
+
+7. Customers with Frequent Returns
+SELECT 
+    CustomerID,
+    COUNT(*) AS ReturnCount
+FROM RegionalSales2025
+WHERE OrderStatus = 'Returned'
+GROUP BY CustomerID
+HAVING COUNT(*) >= 3
+ORDER BY ReturnCount DESC;
+
+--------------------------------------------------
+
+END OF FILE
